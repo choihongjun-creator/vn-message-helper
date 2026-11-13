@@ -1,0 +1,404 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>메시지 도우미</title>
+<meta name="robots" content="noindex, nofollow">
+<meta name="description" content="한국어로 쓰면 자연스러운 베트남어로, 받은 베트남어는 맥락까지 풀어서">
+<meta name="theme-color" content="#0f766e">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icons/icon-192.png">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="메시지 도우미">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<style>
+:root{
+  --bg:#f3f4f6; --card:#fff; --ink:#111827; --sub:#6b7280; --line:#e5e7eb;
+  --brand:#0f766e; --brand-ink:#fff; --brand-bg:#ecfdf5; --red:#dc2626; --yellow:#b45309; --yellow-bg:#fef3c7; --me:#0f766e; --them:#ffffff;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){ --bg:#0b0f17; --card:#151b26; --ink:#e5e7eb; --sub:#9ca3af; --line:#273042;
+    --brand:#14b8a6; --brand-bg:#0c2a27; --red:#f87171; --yellow:#fbbf24; --yellow-bg:#3a2a0a; --me:#115e59; --them:#1f2633; }
+}
+:root[data-theme="dark"]{ --bg:#0b0f17; --card:#151b26; --ink:#e5e7eb; --sub:#9ca3af; --line:#273042;
+  --brand:#14b8a6; --brand-bg:#0c2a27; --red:#f87171; --yellow:#fbbf24; --yellow-bg:#3a2a0a; --me:#115e59; --them:#1f2633; }
+*{box-sizing:border-box}
+html,body{margin:0;background:var(--bg);color:var(--ink);font-family:-apple-system,BlinkMacSystemFont,"Apple SD Gothic Neo","Malgun Gothic","Noto Sans KR",sans-serif;-webkit-text-size-adjust:100%}
+.app{max-width:440px;margin:0 auto;min-height:100vh;display:flex;flex-direction:column}
+@media (min-width:600px){ .app{margin:24px auto;min-height:calc(100vh - 48px);border:1px solid var(--line);border-radius:28px;overflow:hidden;box-shadow:0 10px 40px rgba(0,0,0,.12)} }
+header{display:flex;align-items:center;gap:8px;padding:calc(14px + env(safe-area-inset-top)) 16px 8px}
+header h1{font-size:19px;margin:0;flex:1}
+.back{border:0;background:none;color:var(--ink);font-size:22px;padding:0 6px 0 0;cursor:pointer}
+main{flex:1;overflow-y:auto;padding:0 16px 96px}
+nav.tabs{position:sticky;bottom:0;display:flex;background:var(--card);border-top:1px solid var(--line);padding-bottom:env(safe-area-inset-bottom)}
+nav.tabs button{flex:1;border:0;background:none;padding:10px 0 12px;color:var(--sub);font-size:12px;cursor:pointer}
+nav.tabs button .i{display:block;font-size:20px;margin-bottom:2px}
+nav.tabs button.on{color:var(--brand);font-weight:700}
+.chips{display:flex;gap:6px;overflow-x:auto;margin:4px 0 10px;padding-bottom:2px}
+.chip{flex:none;border:1px solid var(--line);background:var(--card);color:var(--ink);border-radius:999px;padding:7px 13px;font-size:14px;cursor:pointer}
+.chip.on{background:var(--brand);border-color:var(--brand);color:var(--brand-ink)}
+.seg{display:flex;background:var(--card);border:1px solid var(--line);border-radius:12px;padding:3px;margin-bottom:10px}
+.seg button{flex:1;border:0;background:none;padding:9px;border-radius:9px;font-size:14px;font-weight:700;color:var(--sub);cursor:pointer}
+.seg button.on{background:var(--brand);color:var(--brand-ink)}
+.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:14px;margin-bottom:10px}
+textarea,input,select{width:100%;font-size:16px;padding:12px;border:1px solid var(--line);border-radius:10px;background:var(--card);color:var(--ink);font-family:inherit}
+textarea{min-height:92px;resize:vertical}
+.btn{display:block;width:100%;border:0;border-radius:12px;padding:13px;font-size:15px;font-weight:700;cursor:pointer;background:var(--brand);color:var(--brand-ink);margin-top:10px}
+.btn.ghost{background:var(--card);color:var(--ink);border:1px solid var(--line)}
+.btn.sm{display:inline-block;width:auto;padding:8px 12px;font-size:13px;margin:8px 6px 0 0}
+.btn:disabled{opacity:.6}
+.row2{display:flex;gap:8px} .row2 .btn{flex:1}
+label.f{display:block;font-size:13px;color:var(--sub);margin:14px 0 6px}
+.sec{font-size:13px;color:var(--sub);font-weight:700;margin:16px 0 8px;display:flex;justify-content:space-between}
+.small{font-size:12px;color:var(--sub);line-height:1.5}
+.vi{font-size:18px;line-height:1.5;font-weight:600}
+.ko{font-size:14px;color:var(--sub);margin-top:6px;line-height:1.5}
+.q{background:var(--yellow-bg);border-radius:10px;padding:10px;margin-top:10px;font-size:14px}
+.q b{color:var(--yellow)}
+.note{font-size:13px;margin-top:8px;line-height:1.5}
+.tag{display:inline-block;background:var(--brand-bg);color:var(--brand);border-radius:6px;padding:2px 6px;font-size:12px;margin:2px 4px 2px 0}
+.bub{max-width:86%;border-radius:14px;padding:9px 11px;margin:6px 0;font-size:14px;line-height:1.45}
+.bub.out{margin-left:auto;background:var(--me);color:#fff} .bub.out .s{color:#d1fae5}
+.bub.in{background:var(--them);border:1px solid var(--line)} .bub .s{font-size:12px;color:var(--sub);margin-top:3px}
+.mem{display:flex;justify-content:space-between;align-items:center;gap:8px;padding:10px 0;border-bottom:1px solid var(--line)}
+.mem:last-child{border-bottom:0}
+.link{border:0;background:none;color:var(--red);cursor:pointer;font-size:13px;padding:4px}
+.err{color:var(--red);font-size:14px;margin-top:10px}
+.toast{position:fixed;left:50%;bottom:100px;transform:translateX(-50%);background:#111827;color:#fff;padding:10px 16px;border-radius:999px;font-size:14px;opacity:0;transition:opacity .2s;pointer-events:none;z-index:20}
+.toast.show{opacity:.95}
+.spin{display:inline-block;width:14px;height:14px;border:2px solid currentColor;border-right-color:transparent;border-radius:50%;animation:r .7s linear infinite;vertical-align:-2px;margin-right:6px}
+@keyframes r{to{transform:rotate(360deg)}}
+.pass{color:#15803d;font-weight:700} .fail{color:var(--red);font-weight:700}
+</style>
+</head>
+<body>
+<div class="app">
+  <header id="hd"></header>
+  <main id="mn"></main>
+  <nav class="tabs" id="tabs">
+    <button data-tab="chat"><span class="i">💬</span>대화</button>
+    <button data-tab="people"><span class="i">👥</span>상대·이름</button>
+    <button data-tab="settings"><span class="i">⚙️</span>설정</button>
+  </nav>
+</div>
+<div class="toast" id="toast"></div>
+<input type="file" id="fAny" accept="image/*" style="display:none">
+
+<script type="module">
+import Anthropic from 'https://cdn.jsdelivr.net/npm/@anthropic-ai/sdk@1.3.0/+esm';
+
+/* ================= 기본값 ================= */
+const MODEL = 'claude-opus-5-5';
+const PRONOUNS = [
+  {id:'anh-em', label:'내가 오빠·형 (나 anh / 상대 em)', self:'anh', other:'em'},
+  {id:'chi-em', label:'내가 언니·누나 (나 chị / 상대 em)', self:'chị', other:'em'},
+  {id:'em-anh', label:'상대가 오빠·형 (나 em / 상대 anh)', self:'em', other:'anh'},
+  {id:'em-chi', label:'상대가 언니·누나 (나 em / 상대 chị)', self:'em', other:'chị'},
+  {id:'friend', label:'친구 (나 mình / 상대 bạn)', self:'mình', other:'bạn'},
+  {id:'formal', label:'업무·처음 보는 사람 (나 tôi / 상대 anh·chị)', self:'tôi', other:'anh/chị'}
+];
+const DEFAULT_GLOSSARY = [
+  {vi:'Hà Nội', ko:'하노이', kind:'지명'}, {vi:'Bắc Ninh', ko:'박닌', kind:'지명'}, {vi:'Bắc Giang', ko:'박장', kind:'지명'},
+  {vi:'Hải Phòng', ko:'하이퐁', kind:'지명'}, {vi:'Phú Thọ', ko:'푸토', kind:'지명'}, {vi:'Vĩnh Phúc', ko:'빈푹', kind:'지명'},
+  {vi:'Hồ Chí Minh', ko:'호치민', kind:'지명'}, {vi:'Đà Nẵng', ko:'다낭', kind:'지명'}
+];
+
+/* ================= 저장 ================= */
+const KEY='msg-helper-v1';
+function fresh(){ return {apiKey:'', contacts:[], glossary:[...DEFAULT_GLOSSARY], history:{}, cur:null}; }
+function load(){ let o=null; try{ o=JSON.parse(localStorage.getItem(KEY)||'null'); }catch(e){} return Object.assign(fresh(), o||{}); }
+function save(){ try{ localStorage.setItem(KEY, JSON.stringify(S)); }catch(e){ toast('저장 공간이 부족합니다'); } }
+let S=load();
+const uid=()=>Math.random().toString(36).slice(2,9);
+
+/* ================= 공통 ================= */
+const $=s=>document.querySelector(s), $$=s=>[...document.querySelectorAll(s)];
+const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+function toast(m){ const t=$('#toast'); t.textContent=m; t.classList.add('show'); clearTimeout(toast._t); toast._t=setTimeout(()=>t.classList.remove('show'),1800); }
+async function copy(text){ try{ await navigator.clipboard.writeText(text); toast('복사했습니다. Zalo에 붙여 넣으세요'); }
+  catch(e){ const ta=document.createElement('textarea'); ta.value=text; document.body.appendChild(ta); ta.select(); document.execCommand('copy'); ta.remove(); toast('복사했습니다'); } }
+const contact=()=>S.contacts.find(c=>c.id===S.cur)||null;
+function pickImage(){ return new Promise(ok=>{ const f=$('#fAny'); f.value=''; f.onchange=()=>ok(f.files[0]||null); f.click(); }); }
+async function imageToBase64(file){
+  const bmp=await createImageBitmap(file); const k=Math.min(1,1568/Math.max(bmp.width,bmp.height));
+  const cv=document.createElement('canvas'); cv.width=Math.round(bmp.width*k); cv.height=Math.round(bmp.height*k);
+  cv.getContext('2d').drawImage(bmp,0,0,cv.width,cv.height);
+  return cv.toDataURL('image/jpeg',0.85).split(',')[1];
+}
+
+/* ================= AI 부르기 ================= */
+const SYSTEM = `You help a Korean person who lives in Vietnam chat with Vietnamese people on Zalo. Each request has a task.
+
+task "send" — the user wrote Korean; write what they mean as a natural casual chat message that a Vietnamese native would send to this contact, with full diacritics.
+- Use the pronouns given for the contact (how the user calls themself, how they call the contact). Never fall back to a stiff "bạn/tôi" unless those are the given pronouns.
+- Write names and places from the glossary exactly as listed, with diacritics. A Latin word in the Korean (e.g. "ngan") that matches a glossary name is that name.
+- Keep the meaning and tone: do not add, drop or soften content; questions stay questions; nuances like "~잖아" keep their feel with particles such as "mà".
+- If the Korean has a likely typo or an ambiguity that would change the meaning, still give your best version, and put one short Korean question in "questions" with 2–3 answer options.
+- "back_ko": translate your Vietnamese back into Korean closely enough that the user can check it.
+- "notes": at most two short Korean notes, only when useful (word choice, or if something may read as rude in Vietnamese chat).
+
+task "read" — the user pasted (or screenshotted) Vietnamese messages from the contact.
+- Chat Vietnamese is often casual: missing diacritics, teencode and abbreviations (k, ko, dc, j, r, ny, a, e, nha, nhé…), mixed pronouns. Use the history and glossary to read names and places correctly (e.g. "ngan" may be the name Ngân rather than the word for a duck).
+- "ko": the natural Korean meaning. "decoded": abbreviations or diacritic-less words you interpreted, each with its meaning. "unclear": anything that could mean more than one thing, in Korean.
+- "replies": 2–3 short, different reply options in Vietnamese (same pronoun rules), each with its Korean meaning.
+
+task "look" — the user photographed something in Vietnam (shop sign, menu, price list, notice, label). Ignore the contact and history for this task.
+- "what": in Korean, what this is and what the place sells or what the notice says, in one or two sentences.
+- "items": the menu items, products or key lines you can read, each with the Vietnamese as written, its Korean meaning, and the price exactly as shown ("" if none). Keep the order of the photo; at most 30.
+- "tips": up to three short Korean tips only when useful (e.g. what a dish actually is, spiciness, how to order, opening hours). Do not guess text you cannot read; say it is unreadable instead.
+
+Write all Korean in natural polite Korean (해요체). Fill every field; use empty arrays when there is nothing to say.`;
+const LOOK_SCHEMA = {type:'object', additionalProperties:false, required:['what','items','tips'], properties:{
+  what:{type:'string'},
+  items:{type:'array', items:{type:'object', additionalProperties:false, required:['vi','ko','price'], properties:{vi:{type:'string'}, ko:{type:'string'}, price:{type:'string'}}}},
+  tips:{type:'array', items:{type:'string'}} }};
+
+const SEND_SCHEMA = {type:'object', additionalProperties:false, required:['vi','back_ko','questions','notes'], properties:{
+  vi:{type:'string'}, back_ko:{type:'string'},
+  questions:{type:'array', items:{type:'object', additionalProperties:false, required:['q','options'], properties:{q:{type:'string'}, options:{type:'array', items:{type:'string'}}}}},
+  notes:{type:'array', items:{type:'string'}} }};
+const READ_SCHEMA = {type:'object', additionalProperties:false, required:['ko','decoded','unclear','replies'], properties:{
+  ko:{type:'string'},
+  decoded:{type:'array', items:{type:'object', additionalProperties:false, required:['word','meaning'], properties:{word:{type:'string'}, meaning:{type:'string'}}}},
+  unclear:{type:'array', items:{type:'string'}},
+  replies:{type:'array', items:{type:'object', additionalProperties:false, required:['vi','ko'], properties:{vi:{type:'string'}, ko:{type:'string'}}}} }};
+
+function contextText(c, task){
+  const g = S.glossary.map(x=>`- ${x.vi} (${x.kind}${x.ko?', 한국어 '+x.ko:''})`).join('\n');
+  const h = (S.history[c.id]||[]).slice(-12).map(m=> m.dir==='out' ? `user → ${m.vi}` : `${c.name} → ${m.vi}`).join('\n');
+  return `<contact>name: ${c.name}\nrelationship: ${c.rel||'-'}\nuser calls themself: ${c.self}\nuser calls the contact: ${c.other}</contact>\n<glossary>\n${g}\n</glossary>\n<history>\n${h||'(none)'}\n</history>\n<task>${task}</task>`;
+}
+
+async function askClaude(task, c, text, imageB64){
+  if(!S.apiKey) throw Object.assign(new Error('no key'),{code:'nokey'});
+  const client = new Anthropic({ apiKey:S.apiKey, dangerouslyAllowBrowser:true, maxRetries:1 });
+  const content = [];
+  if(imageB64) content.push({type:'image', source:{type:'base64', media_type:'image/jpeg', data:imageB64}});
+  content.push({type:'text', text: contextText(c, task) + `\n<text>\n${text||'(see the screenshot)'}\n</text>`});
+  const res = await client.beta.messages.create({
+    model: MODEL, max_tokens: 16000,
+    betas: ['server-side-fallback-2026-07-01'], fallbacks: 'default',
+    system: SYSTEM,
+    output_config: { effort:'medium', format:{ type:'json_schema', schema: task==='send'?SEND_SCHEMA:task==='read'?READ_SCHEMA:LOOK_SCHEMA } },
+    messages: [{role:'user', content}]
+  });
+  if(res.stop_reason==='refusal') throw Object.assign(new Error('refusal'),{code:'refusal'});
+  if(res.stop_reason==='max_tokens') throw Object.assign(new Error('cut'),{code:'cut'});
+  const t = res.content.filter(b=>b.type==='text').map(b=>b.text).join('');
+  return JSON.parse(t);
+}
+function errText(e){
+  if(e.code==='nokey') return '설정에서 API 키를 먼저 넣어 주세요.';
+  if(e.code==='refusal') return 'AI가 이 내용은 처리하지 않았습니다. 표현을 바꿔 다시 해 보세요.';
+  if(e.code==='cut') return '답이 너무 길어 잘렸습니다. 글을 나눠서 다시 해 보세요.';
+  if(e instanceof Anthropic.AuthenticationError) return 'API 키가 맞지 않습니다. 설정에서 다시 확인해 주세요.';
+  if(e instanceof Anthropic.PermissionDeniedError) return '이 API 키로는 쓸 수 없습니다(권한·결제 확인).';
+  if(e instanceof Anthropic.RateLimitError) return '잠시 사용량이 많습니다. 조금 뒤 다시 해 주세요.';
+  if(e instanceof Anthropic.APIConnectionError) return '인터넷 연결을 확인해 주세요.';
+  if(e instanceof Anthropic.APIError) return `AI 서버 오류(${e.status||'?'})입니다. 잠시 뒤 다시 해 주세요.`;
+  if(e instanceof SyntaxError) return '답을 읽지 못했습니다. 다시 해 주세요.';
+  return '알 수 없는 오류입니다: '+(e.message||e);
+}
+
+/* ================= 화면 ================= */
+let R={tab:'chat', mode:'send', busy:false, result:null, err:'', draft:'', img:null};
+$$('#tabs button').forEach(b=>b.onclick=()=>{ R.tab=b.dataset.tab; R.view=null; render(); });
+function head(t, back){ $('#hd').innerHTML=(back?'<button class="back" id="bk">‹</button>':'')+`<h1>${esc(t)}</h1>`; if(back) $('#bk').onclick=back; }
+function render(){ $$('#tabs button').forEach(b=>b.classList.toggle('on',b.dataset.tab===R.tab));
+  if(R.view==='editContact') return vEditContact();
+  ({chat:vChat, people:vPeople, settings:vSettings}[R.tab])(); }
+
+/* ---- 대화 ---- */
+function vChat(){
+  head('메시지 도우미');
+  if(!S.contacts.length && R.mode!=='look'){
+    $('#mn').innerHTML=`<div class="card"><div style="font-weight:700;font-size:16px">대화 상대부터 추가하세요</div>
+      <div class="small" style="margin-top:6px">상대 이름과 서로 부르는 말(anh·em 등)을 정해 두면, 그 사람에게 맞는 말투로 써 줍니다.</div>
+      <button class="btn" id="goAdd">+ 상대 추가</button><button class="btn ghost" id="goLook">📷 간판·메뉴 사진 풀기는 바로 쓰기</button></div>
+      ${S.apiKey?'':'<div class="card small">AI를 쓰려면 설정에서 API 키를 넣어야 합니다.</div>'}`;
+    $('#goAdd').onclick=()=>{ R.view='editContact'; R.editId=null; render(); };
+    $('#goLook').onclick=()=>{ R.mode='look'; render(); }; return;
+  }
+  if(S.contacts.length && !contact()) { S.cur=S.contacts[0].id; save(); }
+  const c=contact() || {id:'none', name:'-', rel:'', self:'tôi', other:'bạn'};
+  const chips=S.contacts.map(x=>`<button class="chip ${x.id===S.cur?'on':''}" data-c="${x.id}">${esc(x.name)}</button>`).join('')+`<button class="chip" id="addC">+</button>`;
+  let h=`<div class="chips">${chips}</div>
+    <div class="seg"><button data-m="send" class="${R.mode==='send'?'on':''}">✍ 보낼 말</button><button data-m="read" class="${R.mode==='read'?'on':''}">📩 받은 말</button><button data-m="look" class="${R.mode==='look'?'on':''}">📷 간판·메뉴</button></div>
+    ${R.mode==='look'?lookCardHTML():`<div class="card">
+      <textarea id="tx" placeholder="${R.mode==='send'?`${esc(c.name)}에게 하고 싶은 말을 한국어로`:'받은 베트남어 메시지를 붙여 넣기'}">${esc(R.draft)}</textarea>
+      ${R.mode==='read'?`<div class="row2"><button class="btn ghost" id="pic">🖼 캡처 사진 올리기</button><button class="btn ghost" id="paste">📋 붙여 넣기</button></div>
+        ${R.img?'<div class="small" style="margin-top:6px">✔ 사진을 넣었습니다 <button class="link" id="noimg">빼기</button></div>':''}`:''}
+      <button class="btn" id="go" ${R.busy?'disabled':''}>${R.busy?'<span class="spin"></span>쓰는 중…':(R.mode==='send'?'베트남어로 쓰기':'뜻 풀기 + 답장 추천')}</button>
+      ${R.err?`<div class="err">${esc(R.err)}</div>`:''}
+    </div>`}`;
+  h+=resultHTML(c);
+  const hist=(S.history[c.id]||[]).slice(-20);
+  if(hist.length) h+=`<div class="sec">최근 대화 <button class="link" id="clr">지우기</button></div>`+hist.map(m=>`<div class="bub ${m.dir}">${esc(m.vi)}<div class="s">${esc(m.ko||'')}</div></div>`).join('');
+  $('#mn').innerHTML=h;
+  $$('[data-c]').forEach(b=>b.onclick=()=>{ S.cur=b.dataset.c; save(); R.result=null; R.err=''; render(); });
+  $('#addC').onclick=()=>{ R.view='editContact'; R.editId=null; render(); };
+  $$('[data-m]').forEach(b=>b.onclick=()=>{ R.mode=b.dataset.m; R.result=null; R.err=''; R.img=null; render(); });
+  if(R.mode==='look'){ bindLook(c); bindResult(c); return; }
+  $('#tx').oninput=e=>R.draft=e.target.value;
+  if(R.mode==='read'){
+    $('#pic').onclick=async()=>{ const f=await pickImage(); if(!f) return; try{ R.img=await imageToBase64(f); toast('사진을 넣었습니다'); }catch(e){ toast('사진을 읽지 못했습니다'); } render(); };
+    $('#paste').onclick=async()=>{ try{ R.draft=await navigator.clipboard.readText(); render(); }catch(e){ toast('붙여 넣기를 허용해 주세요. 글 칸을 길게 눌러 붙여 넣어도 됩니다'); } };
+    const ni=$('#noimg'); if(ni) ni.onclick=()=>{ R.img=null; render(); };
+  }
+  $('#go').onclick=()=>run(c);
+  const cl=$('#clr'); if(cl) cl.onclick=()=>{ if(confirm('이 상대와의 최근 대화 기록을 지울까요?')){ S.history[c.id]=[]; save(); render(); } };
+  bindResult(c);
+}
+async function run(c, extra){
+  const text=(R.draft||'').trim();
+  if(!text && !R.img){ toast(R.mode==='send'?'보낼 말을 적어 주세요':'받은 메시지를 넣어 주세요'); return; }
+  R.busy=true; R.err=''; R.result=null; render();
+  try{ R.result = await askClaude(R.mode, c, extra ? `${text}\n(추가 설명: ${extra})` : text, R.mode==='read'?R.img:null); R.result._src=text; }
+  catch(e){ console.error(e); R.err=errText(e); }
+  R.busy=false; render();
+}
+/* ---- 간판·메뉴 사진 ---- */
+function lookCardHTML(){
+  return `<div class="card">
+    <div class="small">간판, 메뉴판, 가격표, 안내문을 찍으면 무엇을 파는지, 메뉴가 무엇이고 얼마인지 알려 드립니다.</div>
+    <div class="row2"><button class="btn" id="lCam" ${R.busy?'disabled':''}>📷 찍기</button><button class="btn ghost" id="lPic" ${R.busy?'disabled':''}>🖼 사진 고르기</button></div>
+    ${R.busy?'<div class="small" style="margin-top:8px"><span class="spin"></span>읽는 중…</div>':''}
+    ${R.err?`<div class="err">${esc(R.err)}</div>`:''}</div>`;
+}
+function bindLook(c){
+  const go=async cap=>{
+    const f=$('#fAny'); if(cap) f.setAttribute('capture','environment'); else f.removeAttribute('capture');
+    const file=await pickImage(); f.removeAttribute('capture'); if(!file) return;
+    R.busy=true; R.err=''; R.result=null; render();
+    try{ R.result=await askClaude('look', c, '', await imageToBase64(file)); }
+    catch(e){ console.error(e); R.err=errText(e); }
+    R.busy=false; render();
+  };
+  $('#lCam').onclick=()=>go(true); $('#lPic').onclick=()=>go(false);
+}
+function resultHTML(c){
+  const r=R.result; if(!r) return '';
+  if(R.mode==='look') return `<div class="sec">이곳은</div><div class="card"><div style="font-size:16px;line-height:1.55">${esc(r.what)}</div>
+      ${r.tips.map(t=>`<div class="note">💡 ${esc(t)}</div>`).join('')}</div>
+    ${r.items.length?`<div class="sec">읽은 내용 <span>${r.items.length}개</span></div><div class="card">`+r.items.map(x=>`<div class="mem"><div><div style="font-weight:600">${esc(x.ko)}</div><div class="small">${esc(x.vi)}</div></div><div style="white-space:nowrap;font-weight:700">${esc(x.price)}</div></div>`).join('')+`</div>`:''}`;
+  if(R.mode==='send') return `<div class="sec">보낼 베트남어</div><div class="card">
+      <div class="vi">${esc(r.vi)}</div><div class="ko">↩ ${esc(r.back_ko)}</div>
+      ${r.questions.map((q,i)=>`<div class="q"><b>확인</b> ${esc(q.q)}<div>${q.options.map(o=>`<button class="btn ghost sm" data-ans="${esc(o)}">${esc(o)}</button>`).join('')}</div></div>`).join('')}
+      ${r.notes.map(n=>`<div class="note">💡 ${esc(n)}</div>`).join('')}
+      <div class="row2"><button class="btn" id="cp">📋 복사</button><button class="btn ghost" id="sent">✓ 보냈어요</button></div></div>`;
+  return `<div class="sec">뜻</div><div class="card"><div style="font-size:16px;line-height:1.55">${esc(r.ko)}</div>
+      ${r.decoded.length?`<div style="margin-top:8px">${r.decoded.map(d=>`<span class="tag">${esc(d.word)} = ${esc(d.meaning)}</span>`).join('')}</div>`:''}
+      ${r.unclear.map(u=>`<div class="q"><b>애매함</b> ${esc(u)}</div>`).join('')}
+      <button class="btn ghost sm" id="savein">기록에 남기기</button></div>
+    <div class="sec">답장 추천</div>`+r.replies.map((x,i)=>`<div class="card"><div class="vi" style="font-size:16px">${esc(x.vi)}</div><div class="ko">${esc(x.ko)}</div>
+      <button class="btn sm" data-rcp="${i}">📋 복사</button></div>`).join('');
+}
+function pushHist(c, m){ (S.history[c.id] ||= []).push({...m, t:Date.now()}); S.history[c.id]=S.history[c.id].slice(-50); save(); }
+function bindResult(c){
+  const r=R.result; if(!r || R.mode==='look') return;
+  if(R.mode==='send'){
+    $('#cp').onclick=()=>copy(r.vi);
+    $('#sent').onclick=()=>{ pushHist(c,{dir:'out', vi:r.vi, ko:r._src}); R.result=null; R.draft=''; toast('기록했습니다'); render(); };
+    $$('[data-ans]').forEach(b=>b.onclick=()=>run(c, b.dataset.ans));
+  } else {
+    const keep=()=>{ if(r._kept) return; r._kept=true; pushHist(c,{dir:'in', vi:r._src||'(캡처 사진)', ko:r.ko}); };
+    $('#savein').onclick=()=>{ keep(); toast('기록했습니다'); render(); };
+    $$('[data-rcp]').forEach(b=>b.onclick=()=>{ const x=r.replies[+b.dataset.rcp]; keep(); copy(x.vi); pushHist(c,{dir:'out', vi:x.vi, ko:x.ko}); });
+  }
+}
+
+/* ---- 상대·이름 ---- */
+function vPeople(){
+  head('상대·이름');
+  $('#mn').innerHTML=`<div class="sec">대화 상대</div><div class="card">
+      ${S.contacts.map(c=>`<div class="mem"><div><div style="font-weight:600">${esc(c.name)}</div><div class="small">나 ${esc(c.self)} · 상대 ${esc(c.other)}${c.rel?' · '+esc(c.rel):''}</div></div>
+        <span><button class="link" style="color:var(--brand)" data-ed="${c.id}">고치기</button><button class="link" data-rm="${c.id}">삭제</button></span></div>`).join('')||'<div class="small">아직 없습니다</div>'}
+      <button class="btn" id="add">+ 상대 추가</button></div>
+    <div class="sec">이름·지명 사전 <span>틀리지 않게 고정</span></div><div class="card">
+      <div class="small" style="margin-bottom:6px">사람 이름은 성조까지 정확히 넣어 두세요. 예: Ngân. 번역할 때 이 표기를 그대로 씁니다.</div>
+      ${S.glossary.map((g,i)=>`<div class="mem"><div><b>${esc(g.vi)}</b> <span class="small">${esc(g.kind)}${g.ko?' · '+esc(g.ko):''}</span></div><button class="link" data-grm="${i}">삭제</button></div>`).join('')}
+      <div class="row2" style="margin-top:10px"><input id="gv" placeholder="베트남어 (예: Ngân)"><input id="gk" placeholder="한국어 (예: 응언)"></div>
+      <select id="gt" style="margin-top:8px"><option>사람 이름</option><option>지명</option><option>가게·회사</option><option>기타</option></select>
+      <button class="btn ghost" id="gadd">사전에 추가</button></div>`;
+  $('#add').onclick=()=>{ R.view='editContact'; R.editId=null; render(); };
+  $$('[data-ed]').forEach(b=>b.onclick=()=>{ R.view='editContact'; R.editId=b.dataset.ed; render(); });
+  $$('[data-rm]').forEach(b=>b.onclick=()=>{ if(!confirm('이 상대와 대화 기록을 삭제할까요?')) return; S.contacts=S.contacts.filter(c=>c.id!==b.dataset.rm); delete S.history[b.dataset.rm]; save(); render(); });
+  $$('[data-grm]').forEach(b=>b.onclick=()=>{ S.glossary.splice(+b.dataset.grm,1); save(); render(); });
+  $('#gadd').onclick=()=>{ const v=$('#gv').value.trim(); if(!v){ toast('베트남어 표기를 넣어 주세요'); return; } S.glossary.push({vi:v, ko:$('#gk').value.trim(), kind:$('#gt').value}); save(); render(); toast('사전에 넣었습니다'); };
+}
+function vEditContact(){
+  const ed=S.contacts.find(c=>c.id===R.editId);
+  const cur=ed?{...ed}:{name:'', rel:'', self:'anh', other:'em', pid:'anh-em'};
+  head(ed?'상대 고치기':'상대 추가', ()=>{ R.view=null; render(); });
+  $('#mn').innerHTML=`<label class="f">이름 (Zalo에 보이는 대로, 성조까지)</label><input id="nm" value="${esc(cur.name)}" placeholder="예: Ngân">
+    <label class="f">어떤 사이인가요? (선택)</label><input id="rl" value="${esc(cur.rel)}" placeholder="예: 여자친구, 집주인, 회사 동료">
+    <label class="f">서로 부르는 말</label><select id="pr">${PRONOUNS.map(p=>`<option value="${p.id}" ${cur.pid===p.id?'selected':''}>${esc(p.label)}</option>`).join('')}<option value="custom" ${cur.pid==='custom'?'selected':''}>직접 입력</option></select>
+    <div id="cw" class="row2" style="margin-top:8px;display:${cur.pid==='custom'?'flex':'none'}"><input id="ps" value="${esc(cur.self)}" placeholder="나를 부르는 말"><input id="po" value="${esc(cur.other)}" placeholder="상대를 부르는 말"></div>
+    <div class="small" style="margin-top:6px">잘 모르겠으면 상대가 나를 뭐라고 부르는지 보세요. 상대가 "anh"이라고 부르면 첫 번째를 고르면 됩니다.</div>
+    <button class="btn" id="sv">저장</button>`;
+  $('#pr').onchange=e=>$('#cw').style.display=e.target.value==='custom'?'flex':'none';
+  $('#sv').onclick=()=>{
+    const name=$('#nm').value.trim(); if(!name){ toast('이름을 넣어 주세요'); return; }
+    const pid=$('#pr').value, p=PRONOUNS.find(x=>x.id===pid);
+    const rec={...cur, name, rel:$('#rl').value.trim(), pid, self:p?p.self:($('#ps').value.trim()||'tôi'), other:p?p.other:($('#po').value.trim()||'bạn')};
+    if(ed) Object.assign(ed,rec); else { rec.id=uid(); S.contacts.push(rec); S.cur=rec.id; }
+    if(!S.glossary.some(g=>g.vi.toLowerCase()===name.toLowerCase())) S.glossary.push({vi:name, ko:'', kind:'사람 이름'});
+    save(); R.view=null; R.tab='chat'; R.result=null; render(); toast('저장했습니다. 이름은 사전에도 넣었습니다');
+  };
+}
+
+/* ---- 설정 ---- */
+function vSettings(){
+  head('설정');
+  $('#mn').innerHTML=`<div class="sec">API 키</div><div class="card">
+      <input id="key" type="password" value="${esc(S.apiKey)}" placeholder="sk-ant-…" autocomplete="off">
+      <div class="small" style="margin-top:8px">Anthropic 콘솔(console.anthropic.com)에서 발급한 키를 넣으세요. 키는 이 휴대폰 안에만 저장되고, AI를 부를 때 Anthropic 서버로만 보냅니다. 휴대폰을 남에게 줄 때는 지워 두세요.</div>
+      <div class="row2"><button class="btn" id="ks">저장</button><button class="btn ghost" id="kd">지우기</button></div></div>
+    <div class="sec">번역 시험 <span>통과 기준 5개 중 4개</span></div><div class="card">
+      <div class="small">Zalo가 틀렸던 문장 등 5개를 자동으로 시험합니다. AI 사용료가 5번 나옵니다.</div>
+      <button class="btn ghost" id="tst" ${R.testing?'disabled':''}>${R.testing?'<span class="spin"></span>시험 중…':'시험 시작'}</button>
+      <div id="tres" style="margin-top:8px">${R.testOut||''}</div></div>
+    <div class="sec">주의</div><div class="card small">입력한 글과 사진은 번역을 위해 Anthropic 서버로 보내집니다. 회사 자료나 업무 내용은 넣지 마세요. 대화 기록은 이 휴대폰 안에만 저장됩니다.</div>`;
+  $('#ks').onclick=()=>{ S.apiKey=$('#key').value.trim(); save(); toast('저장했습니다'); };
+  $('#kd').onclick=()=>{ S.apiKey=''; save(); render(); toast('지웠습니다'); };
+  $('#tst').onclick=selfTest;
+}
+
+/* 통과 기준: 사용자 Zalo 사례 3개 + 받은 말 2개 */
+const TESTS = [
+  {name:'지명 박닌', task:'send', text:'박닌에 갈 때마다 항상 그 집으로 가?',
+    check:r=>r.vi.includes('Bắc Ninh') && !/\bbạn\b/i.test(r.vi), want:'Bắc Ninh 표기 + "bạn" 안 씀'},
+  {name:'이름 Ngân', task:'send', text:'그리고 오늘 네가 ngan이랑 하노이에 간다고 했잖아',
+    check:r=>r.vi.includes('Ngân') && !r.back_ko.includes('오리'), want:'Ngân 표기 + "오리" 없음'},
+  {name:'자연스러운 말투', task:'send', text:'하노이 갔다 왔어?',
+    check:r=>/về chưa/i.test(r.vi) && r.vi.includes('Hà Nội'), want:'"…Hà Nội về chưa?" 꼴'},
+  {name:'받은 말: 성조 없음+이름', task:'read', text:'e di ha noi ve r, mai ngan qua nha a do',
+    check:r=>!r.ko.includes('오리') && /하노이/.test(r.ko) && /(Ngân|응언|ngan)/i.test(r.ko), want:'하노이·Ngân으로 읽음, "오리" 없음'},
+  {name:'받은 말: 줄임말', task:'read', text:'a an com chua',
+    check:r=>/밥/.test(r.ko), want:'"밥 먹었어?" 뜻'}
+];
+async function selfTest(){
+  if(!S.apiKey){ toast('API 키를 먼저 넣어 주세요'); return; }
+  R.testing=true; R.testOut=''; render();
+  const c={id:'test', name:'Ngân', rel:'친한 사이', self:'anh', other:'em'};
+  const savedG=S.glossary; if(!S.glossary.some(g=>g.vi==='Ngân')) S.glossary=[...S.glossary,{vi:'Ngân',ko:'응언',kind:'사람 이름'}];
+  let pass=0, out='';
+  for(const t of TESTS){
+    try{ const r=await askClaude(t.task, c, t.text); const ok=t.check(r); if(ok) pass++;
+      out+=`<div class="mem" style="display:block"><span class="${ok?'pass':'fail'}">${ok?'통과':'실패'}</span> ${esc(t.name)} <div class="small">${esc(t.text)} → ${esc(t.task==='send'?r.vi+' / '+r.back_ko:r.ko)}</div><div class="small">기준: ${esc(t.want)}</div></div>`; }
+    catch(e){ out+=`<div class="mem" style="display:block"><span class="fail">오류</span> ${esc(t.name)} <div class="small">${esc(errText(e))}</div></div>`; }
+    R.testOut=out; const box=$('#tres'); if(box) box.innerHTML=out;
+  }
+  S.glossary=savedG;
+  R.testOut=`<div style="font-weight:700;margin-bottom:6px">${pass}/5 통과 → ${pass>=4?'<span class="pass">기준 넘음</span>':'<span class="fail">기준 못 넘음</span>'}</div>`+out;
+  R.testing=false; render();
+}
+
+render();
+if('serviceWorker' in navigator && location.protocol==='https:'){ navigator.serviceWorker.register('sw.js').catch(()=>{}); }
+</script>
+</body>
+</html>
