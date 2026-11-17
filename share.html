@@ -1,0 +1,54 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="robots" content="noindex,nofollow">
+<title>Zalo로 보내기</title>
+<style>
+  :root{--bg:#f4f6f5;--card:#fff;--ink:#14201d;--sub:#5b6b66;--zalo:#0068ff;--line:#dfe6e3}
+  @media (prefers-color-scheme:dark){:root{--bg:#101615;--card:#1a2321;--ink:#e8efed;--sub:#9aaba6;--line:#2c3835}}
+  body{margin:0;background:var(--bg);color:var(--ink);font-family:-apple-system,"Apple SD Gothic Neo","Malgun Gothic",sans-serif;
+       padding:max(20px,env(safe-area-inset-top)) 16px 24px}
+  .card{background:var(--card);border-radius:16px;padding:18px;max-width:460px;margin:0 auto}
+  h1{font-size:19px;margin:0 0 12px}
+  .msg{border:1px solid var(--line);border-radius:12px;padding:14px;font-size:18px;line-height:1.5;white-space:pre-wrap;word-break:break-word;margin-bottom:6px}
+  .ko{color:var(--sub);font-size:14px;margin-bottom:16px;white-space:pre-wrap}
+  button{display:block;width:100%;padding:16px;border:0;border-radius:12px;font-size:17px;font-weight:700;margin-top:10px;cursor:pointer}
+  .share{background:var(--zalo);color:#fff}
+  .copy{background:transparent;color:var(--zalo);border:1px solid var(--zalo)}
+  p{color:var(--sub);font-size:14px;line-height:1.5}
+  .toast{position:fixed;left:50%;bottom:30px;transform:translateX(-50%);background:#14201d;color:#fff;padding:10px 16px;border-radius:10px;font-size:14px;display:none}
+</style>
+</head>
+<body>
+<div class="card">
+  <h1>📤 Zalo로 보내기</h1>
+  <div class="msg" id="msg"></div>
+  <div class="ko" id="ko"></div>
+  <button class="share" id="share">공유 창 열기 → Zalo 선택</button>
+  <button class="copy" id="copy">복사만 하기</button>
+  <p>공유 창에서 <b>Zalo</b>를 고르고 → 상대를 고르고 → 보내기.<br>공유 목록에 Zalo가 없으면 맨 끝 <b>더 보기</b>에서 켜 주세요.<br>보낸 뒤에는 이 창을 닫고 비서 앱으로 돌아가세요.</p>
+</div>
+<div class="toast" id="toast"></div>
+<script>
+  // 베트남 AI 비서의 [📤 공유] 버튼이 이 페이지를 연다.
+  // Claude 앱 안에서는 공유 창(web-share)이 막혀 있어서, 일반 웹 페이지에서 공유 창을 띄운다.
+  // 보낼 글은 주소의 # 뒤에 담겨 와서 서버로 전송되지 않는다.
+  const p = new URLSearchParams(location.hash.slice(1));
+  const text = (p.get('t') || '').slice(0, 4000);
+  const ko = (p.get('k') || '').slice(0, 2000);
+  document.getElementById('msg').textContent = text || '(보낼 글이 없습니다)';
+  document.getElementById('ko').textContent = ko ? '↩ ' + ko : '';
+  const toast = m => { const t = document.getElementById('toast'); t.textContent = m; t.style.display = 'block'; setTimeout(() => t.style.display = 'none', 2200); };
+  const copy = async () => { try { await navigator.clipboard.writeText(text); toast('복사했습니다. Zalo에 붙여 넣으세요'); }
+    catch (e) { const r = document.createRange(); r.selectNodeContents(document.getElementById('msg')); const s = getSelection(); s.removeAllRanges(); s.addRange(r); toast('글을 선택했습니다. 길게 눌러 복사하세요'); } };
+  document.getElementById('copy').onclick = copy;
+  document.getElementById('share').onclick = async () => {
+    if (!text) return;
+    if (navigator.share) { try { await navigator.share({ text }); return; } catch (e) { if (e && e.name === 'AbortError') return; } }
+    copy();
+  };
+</script>
+</body>
+</html>
