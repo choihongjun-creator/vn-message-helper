@@ -1,0 +1,46 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="robots" content="noindex,nofollow">
+<title>그랩 열기</title>
+<style>
+  :root{--bg:#f4f6f5;--card:#fff;--ink:#14201d;--sub:#5b6b66;--grab:#00b14f}
+  @media (prefers-color-scheme:dark){:root{--bg:#101615;--card:#1a2321;--ink:#e8efed;--sub:#9aaba6}}
+  body{margin:0;background:var(--bg);color:var(--ink);font-family:-apple-system,"Apple SD Gothic Neo","Malgun Gothic",sans-serif;
+       padding:max(24px,env(safe-area-inset-top)) 16px 24px;text-align:center}
+  .card{background:var(--card);border-radius:16px;padding:20px;max-width:420px;margin:0 auto}
+  h1{font-size:20px;margin:0 0 6px}
+  .dst{font-size:17px;font-weight:600;margin:10px 0 18px;word-break:break-word}
+  a.go{display:block;padding:16px;border-radius:12px;background:var(--grab);color:#fff;font-size:18px;font-weight:700;text-decoration:none}
+  a.go2{display:block;margin-top:10px;padding:12px;border-radius:12px;border:1px solid var(--grab);color:var(--grab);text-decoration:none}
+  p{color:var(--sub);font-size:14px;line-height:1.5}
+</style>
+</head>
+<body>
+<div class="card">
+  <h1>🚗 그랩 열기</h1>
+  <div class="dst" id="dst"></div>
+  <a class="go" id="go" href="grab://">그랩 앱 열기</a>
+  <a class="go2" href="grab://">목적지 없이 그랩만 열기</a>
+  <p>"Grab에서 열겠습니까?"가 뜨면 <b>열기</b>를 누르세요.<br>목적지가 비어 있으면, 이미 복사돼 있으니 목적지 칸에 붙여 넣으세요.</p>
+</div>
+<script>
+  // 베트남 AI 비서의 [그랩 예약] 버튼이 이 페이지를 연다.
+  // Claude 앱 안에서는 grab:// 를 바로 열 수 없어서, 일반 웹 페이지를 거쳐 그랩을 연다.
+  const q = new URLSearchParams(location.search);
+  const name = (q.get('name') || '').slice(0, 200);
+  const lat = parseFloat(q.get('lat')), lon = parseFloat(q.get('lon'));
+  document.getElementById('dst').textContent = name ? '목적지: ' + name : '';
+  let url = 'grab://open?screenType=BOOKING';
+  if (isFinite(lat) && isFinite(lon) && lat && lon) {
+    const n = encodeURIComponent(name);
+    url += '&dropOffLatitude=' + lat + '&dropOffLongitude=' + lon + '&dropOffAddress=' + n + '&dropOffKeywords=' + n;
+  }
+  document.getElementById('go').href = url;
+  // 바로 한 번 시도 (막히면 버튼을 누르면 됨)
+  setTimeout(() => { location.href = url; }, 400);
+</script>
+</body>
+</html>
