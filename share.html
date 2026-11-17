@@ -17,6 +17,8 @@
   button{display:block;width:100%;padding:16px;border:0;border-radius:12px;font-size:17px;font-weight:700;margin-top:10px;cursor:pointer}
   .share{background:var(--zalo);color:#fff}
   .copy{background:transparent;color:var(--zalo);border:1px solid var(--zalo)}
+  .share{background:transparent;color:var(--zalo);border:1px solid var(--zalo)}
+  a.zalo{display:block;padding:16px;border-radius:12px;background:var(--zalo);color:#fff;font-size:18px;font-weight:700;text-decoration:none;text-align:center}
   p{color:var(--sub);font-size:14px;line-height:1.5}
   .toast{position:fixed;left:50%;bottom:30px;transform:translateX(-50%);background:#14201d;color:#fff;padding:10px 16px;border-radius:10px;font-size:14px;display:none}
 </style>
@@ -26,9 +28,11 @@
   <h1>📤 Zalo로 보내기</h1>
   <div class="msg" id="msg"></div>
   <div class="ko" id="ko"></div>
+  <a class="zalo" id="zalo" href="zalo://">복사하고 Zalo 열기</a>
+  <p style="margin:8px 0 0"><a href="https://zalo.me/" style="color:var(--zalo)">위 버튼으로 안 열리면 여기를 누르세요</a></p>
+  <p id="zhelp">Zalo가 열리면 상대 대화방에서 입력 칸을 <b>길게 눌러 붙여넣기</b> → 보내기.<br>보낸 뒤에는 이 창을 닫고 비서 앱으로 돌아가세요.</p>
   <button class="share" id="share">공유 창 열기 → Zalo 선택</button>
   <button class="copy" id="copy">복사만 하기</button>
-  <p>공유 창에서 <b>Zalo</b>를 고르고 → 상대를 고르고 → 보내기.<br>공유 목록에 Zalo가 없으면 맨 끝 <b>더 보기</b>에서 켜 주세요.<br>보낸 뒤에는 이 창을 닫고 비서 앱으로 돌아가세요.</p>
 </div>
 <div class="toast" id="toast"></div>
 <script>
@@ -44,6 +48,10 @@
   const copy = async () => { try { await navigator.clipboard.writeText(text); toast('복사했습니다. Zalo에 붙여 넣으세요'); }
     catch (e) { const r = document.createRange(); r.selectNodeContents(document.getElementById('msg')); const s = getSelection(); s.removeAllRanges(); s.addRange(r); toast('글을 선택했습니다. 길게 눌러 복사하세요'); } };
   document.getElementById('copy').onclick = copy;
+  // 앱 안 브라우저에는 공유 창이 없을 수 있다 → 그때는 공유 버튼을 숨기고 'Zalo 열기'만 둔다
+  if (!navigator.share) document.getElementById('share').style.display = 'none';
+  // Zalo 열기: 누르는 순간 다시 복사(클립보드가 비었을 경우 대비) 후 Zalo 앱으로
+  document.getElementById('zalo').addEventListener('click', () => { try { navigator.clipboard.writeText(text); } catch (e) {} });
   document.getElementById('share').onclick = async () => {
     if (!text) return;
     if (navigator.share) { try { await navigator.share({ text }); return; } catch (e) { if (e && e.name === 'AbortError') return; } }
